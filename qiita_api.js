@@ -8,31 +8,40 @@ var network;
 var nodeIdNumber;
 // ユーザとノード番号を対応づけるマップ
 var nodeIdMap;
+// ノード間の位置。vis.jsのmassプロパティを設定
+var mass;
 
-function getFollowerInfo(userId, depth){
+// フォローしている/されているユーザをネットワーク図に追加
+function AddUsersToNetwork(data,centerUserId,followerFlag){
+    var nodes_length = nodes.length;
+    var userArray = [];
+    $.each(data,function(index,val){
+        // ノードとエッジに情報を追加
+        var addedUserId = val.id;
+        if(!(addedUserId in nodeIdMap)){
+            //ノードのIDを発行
+            nodeIdMap[addedUserId] = nodeIdNumber;
+            nodeIdNumber++;
+            var node = {id: nodeIdMap[addedUserId], label:addedUserId, shape:'image', image:val.profile_image_url, mass: mass};
+            node["title"] = val.name ? val.name : addedUserId;
+            nodes.add(node);
+        }
+        if(followerFlag){
+            edges.add({from: nodeIdMap[addedUserId], to: nodeIdMap[centerUserId], arrows: 'to'});
+        }else{
+            edges.add({from: nodeIdMap[centerUserId], to: nodeIdMap[addedUserId], arrows: 'to'});
+        }
+    });
+    network.redraw();
+    network.stabilize();
+}
+
+function getFollowerInfo(userId){
     //フォローされているユーザの情報を取得
     $.ajax({
         url:'https://qiita.com/api/v2/users/' + userId + '/followers',
         success: function(data){
-            var nodes_length = nodes.length;
-            var userArray = [];
-            $.each(data,function(index,val){
-                // ノードとエッジに情報を追加
-                var followerId = val.id;
-                if(!(followerId in nodeIdMap)){
-                    //ノードのIDを発行
-                    nodeIdMap.followerId = nodeIdNumber;
-                    nodeIdNumber++;
-                    // ネットワーク拡大用のキューに追加
-                    userArray.push(followerId);
-                }
-                nodes.add({id: nodeIdMap.followerId, label:followerId, shape:'image', image:val.profile_image_url});
-                edges.add({from: nodeIdMap.followerId, to: nodeIdMap.userId, arrows: 'to'});
-            });
-            network.redraw();
-            if(nodeIdNumber < 100){
-                expandNetwork(userArray,depth);
-            }
+            AddUsersToNetwork(data,userId,true);
         },
         error: function(){
             alert("フォローされているユーザの取得中にエラーが発生しました");
@@ -41,30 +50,12 @@ function getFollowerInfo(userId, depth){
 
 }
 
-function getFolloweeInfo(userId, depth){
+function getFolloweeInfo(userId){
     //フォローしているユーザの情報を取得
     $.ajax({
         url:'https://qiita.com/api/v2/users/' + userId + '/followees',
         success: function(data){
-            var nodes_length = nodes.length;
-            var userArray = [];
-            $.each(data,function(index,val){
-                // ノードとエッジに情報を追加
-                var followeeId = val.id;
-                if(!(followeeId in nodeIdMap)){
-                    //ノードのIDを発行
-                    nodeIdMap.followeeId = nodeIdNumber;
-                    nodeIdNumber++;
-                    // ネットワーク拡大用のキューに追加
-                    userArray.push(followeeId);
-                }
-                nodes.add({id: nodeIdMap.followeeId, label:followeeId, shape:'image', image:val.profile_image_url});
-                edges.add({from: nodeIdMap.userId, to: nodeIdMap.followeeId, arrows: 'to'});
-            });
-            network.redraw();
-            if(nodeIdNumber < 100){
-                expandNetwork(userArray,depth);
-            }
+            AddUsersToNetwork(data,userId,false);
         },
         error: function(){
             alert("フォローしているユーザの取得中にエラーが発生しました");
@@ -89,6 +80,7 @@ function createUserNetwork(){
     edges = new vis.DataSet();
     nodeIdNumber = 0;
     nodeIdMap = new Object;
+    mass = 3;
     // ネットワークのグラフを表示する要素の取得
     var container = document.getElementById('followers');
     var options = {
@@ -97,6 +89,15 @@ function createUserNetwork(){
         }
     };
     network = new vis.Network(container,{nodes: nodes, edges: edges},options);
+    // ネットワーク図がクリックされたときの処理
+    network.on("click", function(params){
+        if(params.nodes.length == 1){
+            var nodeId = params.nodes[0];
+            var node = nodes.get(nodeId);
+            console.log(node.label + "がクリックされました");
+        }
+    });
+
     //自分のユーザ情報を取得
     $.ajax({
         url:'https://qiita.com/api/v2/users/' + userId,
@@ -104,17 +105,31 @@ function createUserNetwork(){
             //自分をノードとして追加
             if(!(userId in nodeIdMap)){
                 //ノードのIDを発行
-                nodeIdMap.userId = nodeIdNumber;
+                nodeIdMap[userId] = nodeIdNumber;
                 nodeIdNumber++;
             }
-            nodes.add({id:nodeIdMap.userId, label:userId, shape:'image', image:data.profile_image_url});
-            expandNetwork([userId],0);
-            // getFollowerInfo(userId);
-            // getFolloweeInfo(userId);
+            var node = {id:nodeIdMap[userId], label:userId, shape:'image', image:data.profile_image_url, mass: mass};
+            node["title"] = "userId = " + userId;
+            nodes.add(node);
+            // expandNetwork([userId],0);
+            getFollowerInfo(userId);
+            getFolloweeInfo(userId);
         },
         error: function(){
             alert("指定されたユーザは存在しません");
         }
     });
-
 }
+
+window.onload = function(){
+    //var param = location.search
+    //console.log(param);
+    var inputFormText = document.getElementById('input');
+    console.log(inputFormText);
+    inputFormText.addEventListener('submit', function(evt){
+        // フォームを送信する代わりに、ネットワーク図を作成
+        createUserNetwork();
+        evt.preventDefault();
+    });
+
+};
