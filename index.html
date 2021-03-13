@@ -1,22 +1,24 @@
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Qiitaユーザのつながり可視化</title>
-        <!-- jQuery -->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <!-- vis.js -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
-        <script src="QiitaUserNetwork.js"></script>
-    </head>
-    <body>
-        <h1>Qiitaユーザのつながりを、ネットワーク図で可視化します</h1><br>
-        以下のフォームにユーザIDを入力してください<br>
-        <form id="input" name="input_form">
-            <input type="text" name="textbox">
-            <input type="button" value="可視化" onclick="createUserNetwork()">
-        </form>
-        <br>
-        <div id="followers"></div>
-    </body>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Qiitaユーザのつながり可視化</title>
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- vis.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
+    <script src="QiitaUserNetwork.js"></script>
+</head>
+
+<body>
+    <h1>Qiitaユーザのつながりを、ネットワーク図で可視化します</h1>
+    <div>以下のフォームにユーザIDを入力してください</div>
+    <form id="input" name="input_form">
+        <input type="text" name="textbox">
+        <input type="button" value="可視化" onclick="createUserNetwork()">
+    </form>
+    <div id="followers"></div>
+</body>
+
 </html>
