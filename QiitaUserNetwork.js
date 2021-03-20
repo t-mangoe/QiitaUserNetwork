@@ -88,6 +88,29 @@ function expandNetwork(userArray, depth) {
     });
 }
 
+function showUserInfo(data) {
+    const $showArea = $("#userInformation");
+    $showArea.empty();
+    const id = data.id;
+    const followeesNum = data.followees_count;
+    const followersNum = data.followers_count;
+    const imageUrl = data.profile_image_url;
+    const itemsCount = data.items_count;
+
+    const $userImg = $("<img id='userImg'>");
+    $userImg.attr("src", imageUrl);
+    $showArea.append($userImg);
+
+    const $userInfoList = $("<ul>");
+    $userInfoList.append($("<li>id : " + id + "</li>"));
+    $userInfoList.append($("<li>フォロー数 : " + followeesNum + "</li>"));
+    $userInfoList.append($("<li>フォロワー数 : " + followersNum + "</li>"));
+    $userInfoList.append($("<li>投稿数 : " + itemsCount + "</li>"));
+
+    $showArea.append($userInfoList);
+
+}
+
 function createUserNetwork() {
     var userId = input_form.textbox.value;
     nodes = new vis.DataSet();
@@ -119,6 +142,10 @@ function createUserNetwork() {
     $.ajax({
         url: 'https://qiita.com/api/v2/users/' + userId,
         success: function (data) {
+
+            // ユーザー情報を表示
+            showUserInfo(data);
+
             //自分をノードとして追加
             if (!(userId in nodeIdMap)) {
                 //ノードのIDを発行

@@ -3,6 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Qiitaユーザのつながり可視化</title>
+    <link href="main.css" rel="stylesheet">
     <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <!-- vis.js -->
@@ -18,7 +19,10 @@
         <input type="text" name="textbox">
         <input type="button" value="可視化" onclick="createUserNetwork()">
     </form>
-    <div id="followers"></div>
+    <div id="container">
+        <div id="userInformation"></div>
+        <div id="followers"></div>
+    </div>
 </body>
 
 </html>
